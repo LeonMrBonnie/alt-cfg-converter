@@ -8,5 +8,5 @@ if [ ! -d "./dist" ]; then
     mkdir dist
 fi
 
-cp build/linux64/Release/json-to-alt-cfg.exe dist
-#cp build/linux64/Release/json-to-alt-cfg.pdb dist
+cp build/linux64/Release/alt-cfg-converter.exe dist
+#cp build/linux64/Release/alt-cfg-converter.pdb dist
