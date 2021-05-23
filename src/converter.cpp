@@ -93,7 +93,7 @@ namespace Converter
 
             // Return the cfg string
             std::stringstream stream;
-            alt::config::Emitter().Emit(output, stream);
+            alt::config::Emitter::Emit(output, stream);
             return stream.str();
         }
         catch(std::exception& e)
