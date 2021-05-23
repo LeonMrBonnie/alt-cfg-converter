@@ -24,50 +24,58 @@ namespace Converter
     {
         nlohmann::json jsonValue;
         // This check can be left out, but it's left in for clarity
-        if(value.IsNone())
+        using alt::config::Node;
+        switch(value.GetType())
         {
-            jsonValue = nullptr;
-        }
-        else if(value.IsScalar())
-        {
-            // This is ugly, but (probably) the best way to do this
-            try
+            case Node::Type::NONE:
             {
-                jsonValue = value.ToBool();
+                jsonValue = nullptr;
+                break;
             }
-            catch(...)
+            case Node::Type::SCALAR:
             {
-                // Not a bool, so next check if its a number
+                // This is ugly, but (probably) the best way to do this
                 try
                 {
-                    jsonValue = value.ToNumber();
+                    jsonValue = value.ToBool();
                 }
                 catch(...)
                 {
-                    // Not a bool and not a number, so it has to be a normal string
-                    jsonValue = value.ToString();
+                    // Not a bool, so next check if its a number
+                    try
+                    {
+                        jsonValue = value.ToNumber();
+                    }
+                    catch(...)
+                    {
+                        // Not a bool and not a number, so it has to be a normal string
+                        jsonValue = value.ToString();
+                    }
                 }
+                break;
             }
-        }
-        else if(value.IsDict())
-        {
-            auto                                  dict = value.ToDict();
-            std::map<std::string, nlohmann::json> jsonDict;
-            for(auto& kv : dict)
+            case Node::Type::LIST:
             {
-                jsonDict[kv.first] = ConvertCfgValueToJsonValue(kv.second);
+                auto                        list = value.ToList();
+                std::vector<nlohmann::json> jsonList;
+                for(auto& node : list)
+                {
+                    jsonList.push_back(ConvertCfgValueToJsonValue(node));
+                }
+                jsonValue = jsonList;
+                break;
             }
-            jsonValue = jsonDict;
-        }
-        else if(value.IsList())
-        {
-            auto                        list = value.ToList();
-            std::vector<nlohmann::json> jsonList;
-            for(auto& node : list)
+            case Node::Type::DICT:
             {
-                jsonList.push_back(ConvertCfgValueToJsonValue(node));
+                auto                                  dict = value.ToDict();
+                std::map<std::string, nlohmann::json> jsonDict;
+                for(auto& kv : dict)
+                {
+                    jsonDict[kv.first] = ConvertCfgValueToJsonValue(kv.second);
+                }
+                jsonValue = jsonDict;
+                break;
             }
-            jsonValue = jsonList;
         }
 
         return jsonValue;
